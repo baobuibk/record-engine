@@ -12,7 +12,7 @@ async function main() {
   const redisClient = require("./redis");
 
   const httpServer = http.createServer(expressApp);
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT || 8001;
   httpServer.listen(PORT, () => {
     console.log("http server is listening on port", PORT);
   });
