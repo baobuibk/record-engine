@@ -2,11 +2,11 @@ module.exports = {
   $jsonSchema: {
     bsonType: "object",
 
-    required: ["_id", "entityId", "attr"],
+    required: ["_id", "id", "attr"],
 
     properties: {
       _id: { bsonType: "objectId" },
-      entityId: { bsonType: "objectId" },
+      id: { bsonType: "string" },
       attr: { bsonType: "string" },
 
       samples: {

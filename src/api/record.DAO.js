@@ -1,4 +1,3 @@
-const { ObjectId } = require("mongodb");
 const Schema = require("./record.schema");
 
 let Record;
@@ -19,11 +18,25 @@ class RecordDAO {
 
   // Add one sample
   static async addOneSample(entityId, attr, sample) {
-    const millis = new Date(sample.t).getTime();
+    if (Object.prototype.toString.call(sample.t) === "[object Date]") {
+      // it is a date
+      if (isNaN(sample.t.getTime())) {
+        // d.valueOf() could also work
+        // date is not valid
+        sample.t = new Date();
+      } else {
+        // date is valid
+      }
+    } else {
+      // not a date
+      sample.t = new Date();
+    }
+
+    const millis = sample.t.getTime();
     const roundToHour = new Date(millis - (millis % 3600000));
 
     const filter = {
-      entityId: ObjectId(entityId),
+      id: entityId,
       attr,
       date: roundToHour,
       count: { $lt: 10 },
@@ -153,7 +166,7 @@ class RecordDAO {
       }
 
       const records = await Record.aggregate([
-        { $match: { entityId: ObjectId(entityId), attr, date: matchDate } },
+        { $match: { id: entityId, attr, date: matchDate } },
         { $unwind: "$samples" },
         { $project: { _id: 0, sample: "$samples", t: "$samples.t" } },
         { $sort: { t: 1 } },

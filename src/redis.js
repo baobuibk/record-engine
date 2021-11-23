@@ -40,14 +40,13 @@ client.on("psubscribe", (pattern, count) => {
 });
 
 client.on("pmessage", function (pattern, channel, message) {
-  console.log(
-    "pattern '" + pattern + "' matched in channel'" + channel + "': " + message
-  );
+  console.log("pattern '" + pattern + "' matched in channel'" + channel);
 
   const entityId = channel.split(".")[1];
+  let { timestamp, attributes } = JSON.parse(message);
 
-  for (const [key, value] of Object.entries(JSON.parse(message))) {
-    recordDAO.addOneSample(entityId, key, { t: new Date(), v: value });
+  for (const [key, value] of Object.entries(attributes)) {
+    recordDAO.addOneSample(entityId, key, { t: new Date(timestamp), v: value });
   }
 });
 
