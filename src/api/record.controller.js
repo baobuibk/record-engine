@@ -1,4 +1,6 @@
 const RecordDAO = require("./record.DAO");
+const debug = require("debug");
+("RecordController");
 
 const intervalEnums = [
   "year",
@@ -19,10 +21,14 @@ const filterEnums = ["all", "avg", "count", "first", "last", "max", "min"];
 
 class RecordController {
   static async get(req, res) {
+    debug("got here");
     try {
-      const { entityId, attr, date, from, to, interval, filter } = req.query;
+      const { id, attr, date, from, to, interval, filter } = req.query;
 
-      if (!entityId) return res.status(400).send("entityId is undefined");
+      if (!id) {
+        debug("no id");
+        return res.status(400).send("id is undefined");
+      }
 
       if (!attr || typeof attr !== "string" || !attr.length)
         return res.status(400).send("bad attr");
@@ -68,7 +74,7 @@ class RecordController {
       }
 
       let result = await RecordDAO.get({
-        entityId,
+        id,
         attr,
         date: dateArr,
         from: fromArr,

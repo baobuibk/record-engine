@@ -17,7 +17,7 @@ class RecordDAO {
   }
 
   // Add one sample
-  static async addOneSample(entityId, attr, sample) {
+  static async addOneSample(id, attr, sample) {
     if (Object.prototype.toString.call(sample.t) === "[object Date]") {
       // it is a date
       if (isNaN(sample.t.getTime())) {
@@ -36,7 +36,7 @@ class RecordDAO {
     const roundToHour = new Date(millis - (millis % 3600000));
 
     const filter = {
-      id: entityId,
+      id,
       attr,
       date: roundToHour,
       count: { $lt: 10 },
@@ -52,7 +52,7 @@ class RecordDAO {
 
   static async get(props) {
     try {
-      const { entityId, attr, date, from, to, interval, filter } = props;
+      const { id, attr, date, from, to, interval, filter } = props;
 
       let matchDate = {};
 
@@ -166,7 +166,7 @@ class RecordDAO {
       }
 
       const records = await Record.aggregate([
-        { $match: { id: entityId, attr, date: matchDate } },
+        { $match: { id, attr, date: matchDate } },
         { $unwind: "$samples" },
         { $project: { _id: 0, sample: "$samples", t: "$samples.t" } },
         { $sort: { t: 1 } },

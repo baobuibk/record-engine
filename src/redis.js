@@ -1,7 +1,7 @@
 const redis = require("redis");
 const client = redis.createClient();
 
-const recordDAO = require("./api/record.DAO");
+const RecordDAO = require("./api/record.DAO");
 
 client.on("connect", () => {
   console.log("redis client connect");
@@ -43,10 +43,10 @@ client.on("pmessage", function (pattern, channel, message) {
   console.log("pattern '" + pattern + "' matched in channel'" + channel);
 
   const entityId = channel.split(".")[1];
-  let { timestamp, attributes } = JSON.parse(message);
+  let { timestamp, data } = JSON.parse(message);
 
-  for (const [key, value] of Object.entries(attributes)) {
-    recordDAO.addOneSample(entityId, key, { t: new Date(timestamp), v: value });
+  for (const [key, value] of Object.entries(data)) {
+    RecordDAO.addOneSample(entityId, key, { t: new Date(timestamp), v: value });
   }
 });
 
