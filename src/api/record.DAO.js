@@ -61,7 +61,7 @@ class RecordDAO {
         let gte;
         let lt;
         if (date.length === 1) {
-          gte = [date[0], 1];
+          gte = [date[0], 0];
           lt = [date[0], 12];
         } else if (date.length === 2) {
           gte = [date[0], date[1] - 1];
@@ -84,7 +84,7 @@ class RecordDAO {
       } else if (from && to) {
         let gte;
         if (from.length === 1) {
-          gte = [date[0], 1];
+          gte = [from[0], 0];
         } else if (from.length === 2) {
           gte = [from[0], from[1] - 1];
         } else if (from.length === 3) {
@@ -97,7 +97,7 @@ class RecordDAO {
 
         let lt;
         if (to.length === 1) {
-          lt = [date[0], 12];
+          lt = [to[0], 12];
         } else if (to.length === 2) {
           lt = [to[0], to[1]];
         } else if (to.length === 3) {
@@ -115,7 +115,7 @@ class RecordDAO {
       } else if (from && !to) {
         let gte;
         if (from.length === 1) {
-          gte = [date[0], 1];
+          gte = [date[0], 0];
         } else if (from.length === 2) {
           gte = [from[0], from[1] - 1];
         } else if (from.length === 3) {
@@ -132,7 +132,7 @@ class RecordDAO {
       } else if (!from && to) {
         let lt;
         if (to.length === 1) {
-          lt = [date[0], 12];
+          lt = [to[0], 12];
         } else if (to.length === 2) {
           lt = [to[0], to[1]];
         } else if (to.length === 3) {
@@ -164,8 +164,7 @@ class RecordDAO {
         groupObj["count"] = filterObj["count"];
         projectObj["count"] = 1;
       }
-
-      const records = await Record.aggregate([
+      const records = (await Record.aggregate([
         { $match: { id, attr, date: matchDate } },
         { $unwind: "$samples" },
         { $project: { _id: 0, sample: "$samples", t: "$samples.t" } },
@@ -179,8 +178,7 @@ class RecordDAO {
         { $group: { _id: "$time", ...groupObj } },
         { $sort: { _id: 1 } },
         { $project: { _id: 0, time: "$_id", ...projectObj } },
-      ]).toArray();
-
+      ]).toArray())[0];
       return records;
     } catch (error) {
       throw error;

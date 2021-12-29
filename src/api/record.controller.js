@@ -68,7 +68,9 @@ class RecordController {
           fromArr.length < toArr.length ? fromArr.length : toArr.length;
         let wrong = false;
         for (let index = 0; index < level && !wrong; index++) {
+          if (fromArr[index] === toArr[index]) continue;
           if (fromArr[index] > toArr[index]) wrong = true;
+          break 
         }
         if (wrong) return res.status(400).send("from is bigger than to");
       }
