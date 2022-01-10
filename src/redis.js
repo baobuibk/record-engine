@@ -39,10 +39,10 @@ client.on("psubscribe", (pattern, count) => {
   console.log("subscribe to pattern '" + pattern + "' with count: " + count);
 });
 
-client.on("pmessage", function (pattern, channel, message) {
+client.on("pmessage", (pattern, channel, message) => {
   console.log("pattern '" + pattern + "' matched in channel'" + channel);
 
-  const entityId = channel.split(".")[1];
+  const entityId = channel.split("/")[2];
   let { timestamp, data } = JSON.parse(message);
 
   for (const [key, value] of Object.entries(data)) {
@@ -50,6 +50,6 @@ client.on("pmessage", function (pattern, channel, message) {
   }
 });
 
-client.psubscribe("context-broker.*");
+client.psubscribe("context-broker/for-record-engine/*");
 
 module.exports = client;

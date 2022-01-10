@@ -1,6 +1,5 @@
 const RecordDAO = require("./record.DAO");
-const debug = require("debug");
-("RecordController");
+const debug = require("debug")("RecordController");
 
 const intervalEnums = [
   "year",
@@ -21,7 +20,7 @@ const filterEnums = ["all", "avg", "count", "first", "last", "max", "min"];
 
 class RecordController {
   static async get(req, res) {
-    debug("got here");
+    debug(req.query);
     try {
       const { id, attr, date, from, to, interval, filter } = req.query;
 
@@ -70,7 +69,7 @@ class RecordController {
         for (let index = 0; index < level && !wrong; index++) {
           if (fromArr[index] === toArr[index]) continue;
           if (fromArr[index] > toArr[index]) wrong = true;
-          break 
+          break;
         }
         if (wrong) return res.status(400).send("from is bigger than to");
       }
