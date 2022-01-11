@@ -1,4 +1,5 @@
 const Schema = require("./record.schema");
+const dayjs = require("dayjs");
 
 let Record;
 const collName = "record";
@@ -52,106 +53,14 @@ class RecordDAO {
 
   static async get(props) {
     try {
-      const { id, attr, date, from, to, interval, filter } = props;
+      const { id, attr, from, to, interval, filter } = props;
 
-      let matchDate = {};
+      if (!from || !to) throw new Error("bad from & to");
 
-      // date
-      if (date) {
-        let gte;
-        let lt;
-        if (date.length === 1) {
-          gte = [date[0], 0];
-          lt = [date[0], 12];
-        } else if (date.length === 2) {
-          gte = [date[0], date[1] - 1];
-          lt = [date[0], date[1]];
-        } else if (date.length === 3) {
-          gte = [date[0], date[1] - 1, date[2]];
-          lt = [date[0], date[1] - 1, date[2] + 1];
-        } else if (date.length === 4) {
-          gte = [date[0], date[1] - 1, date[2], date[3]];
-          lt = [date[0], date[1] - 1, date[2], date[3] + 1];
-        } else {
-          gte = [date[0], date[1] - 1, date[2], date[3]];
-          lt = [date[0], date[1] - 1, date[2], date[3] + 1];
-        }
-
-        matchDate["$gte"] = new Date(Date.UTC(...gte));
-        matchDate["$lt"] = new Date(Date.UTC(...lt));
-
-        // from and to
-      } else if (from && to) {
-        let gte;
-        if (from.length === 1) {
-          gte = [from[0], 0];
-        } else if (from.length === 2) {
-          gte = [from[0], from[1] - 1];
-        } else if (from.length === 3) {
-          gte = [from[0], from[1] - 1, from[2]];
-        } else if (from.length === 4) {
-          gte = [from[0], from[1] - 1, from[2], from[3]];
-        } else {
-          gte = [from[0], from[1] - 1, from[2], from[3]];
-        }
-
-        let lt;
-        if (to.length === 1) {
-          lt = [to[0], 12];
-        } else if (to.length === 2) {
-          lt = [to[0], to[1]];
-        } else if (to.length === 3) {
-          lt = [to[0], to[1] - 1, to[2] + 1];
-        } else if (to.length === 4) {
-          lt = [to[0], to[1] - 1, to[2], to[3] + 1];
-        } else {
-          lt = [to[0], to[1] - 1, to[2], to[3] + 1];
-        }
-
-        matchDate["$gte"] = new Date(Date.UTC(...gte));
-        matchDate["$lt"] = new Date(Date.UTC(...lt));
-
-        // from and no to
-      } else if (from && !to) {
-        let gte;
-        if (from.length === 1) {
-          gte = [from[0], 0];
-        } else if (from.length === 2) {
-          gte = [from[0], from[1] - 1];
-        } else if (from.length === 3) {
-          gte = [from[0], from[1] - 1, from[2]];
-        } else if (from.length === 4) {
-          gte = [from[0], from[1] - 1, from[2], from[3]];
-        } else {
-          gte = [from[0], from[1] - 1, from[2], from[3]];
-        }
-
-        matchDate["$gte"] = new Date(Date.UTC(...gte));
-
-        // no from and to
-      } else if (!from && to) {
-        let lt;
-        if (to.length === 1) {
-          lt = [to[0], 12];
-        } else if (to.length === 2) {
-          lt = [to[0], to[1]];
-        } else if (to.length === 3) {
-          lt = [to[0], to[1] - 1, to[2] + 1];
-        } else if (to.length === 4) {
-          lt = [to[0], to[1] - 1, to[2], to[3] + 1];
-        } else {
-          lt = [to[0], to[1] - 1, to[2], to[3] + 1];
-        }
-
-        matchDate["$lt"] = new Date(Date.UTC(...lt));
-
-        // no from and no to
-      } else if (!from && !to) {
-        const today = new Date();
-        matchDate["$gte"] = new Date(today - (today % 86400000));
-
-        // should never get here
-      } else throw new Error("somethings wrong with date, from, to");
+      let matchDate = {
+        $gte: dayjs(from).toDate(),
+        $lte: dayjs(to).toDate(),
+      };
 
       const groupObj = {};
       const projectObj = {};
@@ -180,7 +89,6 @@ class RecordDAO {
         { $sort: { _id: 1 } },
         { $project: { _id: 0, time: "$_id", ...projectObj } },
       ];
-      // console.log(require("util").inspect(aggs, { depth: null }));
 
       const result = await Record.aggregate(aggs).toArray();
       return result;

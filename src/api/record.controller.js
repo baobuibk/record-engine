@@ -1,5 +1,6 @@
 const RecordDAO = require("./record.DAO");
 const debug = require("debug")("RecordController");
+const dayjs = require("dayjs");
 
 const intervalEnums = [
   "year",
@@ -22,7 +23,7 @@ class RecordController {
   static async get(req, res) {
     debug(req.query);
     try {
-      const { id, attr, date, from, to, interval, filter } = req.query;
+      const { id, attr, from, to, interval, filter } = req.query;
 
       if (!id) {
         debug("no id");
@@ -43,43 +44,20 @@ class RecordController {
           return res.status(400).send("bad filter");
       }
 
-      if (date) {
-        if (from || to)
-          return res.status(400).send("from and/or to are redundant");
-        var dateArr = date.split(",").map((e) => parseInt(e));
-        if (!isValidTimeArray(dateArr)) return res.status(400).send("bad date");
-      }
-
-      if (from) {
-        var fromArr = from.split(",").map((e) => parseInt(e));
-        var fromArrIsValid = isValidTimeArray(fromArr);
-        if (!fromArrIsValid) return res.status(400).send("bad from");
-      }
-
-      if (to) {
-        var toArr = to.split(",").map((e) => parseInt(e));
-        var toArrIsValid = isValidTimeArray(toArr);
-        if (!toArrIsValid) return res.status(400).send("bad to");
-      }
-
-      if (toArrIsValid && fromArrIsValid) {
-        let level =
-          fromArr.length < toArr.length ? fromArr.length : toArr.length;
-        let wrong = false;
-        for (let index = 0; index < level && !wrong; index++) {
-          if (fromArr[index] === toArr[index]) continue;
-          if (fromArr[index] > toArr[index]) wrong = true;
-          break;
-        }
-        if (wrong) return res.status(400).send("from is bigger than to");
-      }
+      if (
+        !from ||
+        !to ||
+        !dayjs(from).isValid() ||
+        !dayjs(to).isValid() ||
+        dayjs(from).isAfter(dayjs(to))
+      )
+        return res.status(400).send("bad from & to");
 
       let result = await RecordDAO.get({
         id,
         attr,
-        date: dateArr,
-        from: fromArr,
-        to: toArr,
+        from,
+        to,
         interval,
         filter: filterArr,
       });
