@@ -10,7 +10,7 @@ app.use(express.urlencoded({ extended: true }));
 const morganLogger = require("morgan");
 app.use(morganLogger("dev"));
 
-// routes here
+// routes
 app.use("/api/record", require("./api/record.route"));
 
 app.get("/status", (req, res) => res.sendStatus(200));
