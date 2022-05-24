@@ -7,16 +7,18 @@ const debug = require("debug")("record.route");
 router.get("/", async (req, res) => {
   const { entityId, field, unit, operator } = req.query;
 
+  if (!entityId || !field || !unit || !operator) return res.sendStatus(400);
+
   try {
     let result = await RecordDAO.findByTimeUnit(
-      Number(entityId),
+      entityId,
       field,
       unit,
       operator
     );
     return res.json(result);
   } catch (error) {
-    console.log(error);
+    debug(error);
     return res.sendStatus(500);
   }
 });
