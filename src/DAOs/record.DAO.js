@@ -33,23 +33,23 @@ class RecordDAO {
     return await Record.aggregate([
       { $match: { "metadata.entityId": entityId, "metadata.field": field } },
       { $sort: { timestamp: 1 } },
-      {
-        $group: {
-          _id: {
-            date: { $dateTrunc: { date: "$timestamp", unit: unit } },
-          },
-          value: {
-            ["$" + operator]: operator !== "count" ? "$value" : {},
-          },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          value: 1,
-          timestamp: "$_id.date",
-        },
-      },
+      // {
+      //   $group: {
+      //     _id: {
+      //       date: { $dateTrunc: { date: "$timestamp", unit: unit } },
+      //     },
+      //     value: {
+      //       ["$" + operator]: operator !== "count" ? "$value" : {},
+      //     },
+      //   },
+      // },
+      // {
+      //   $project: {
+      //     _id: 0,
+      //     value: 1,
+      //     timestamp: "$_id.date",
+      //   },
+      // },
     ]).toArray();
   }
 }
