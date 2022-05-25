@@ -32,6 +32,7 @@ class RecordDAO {
   static async findByTimeUnit(entityId, field, unit, operator) {
     return await Record.aggregate([
       { $match: { "metadata.entityId": entityId, "metadata.field": field } },
+      { $sort: { timestamp: 1 } },
       {
         $group: {
           _id: {
