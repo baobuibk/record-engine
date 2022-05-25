@@ -52,5 +52,12 @@ class RecordDAO {
       { $sort: { timestamp: 1 } },
     ]).toArray();
   }
+
+  static async deleteMany(entityId, field) {
+    return await Record.deleteMany({
+      "metadata.entityId": entityId,
+      ...(field && { "metadata.field": field }),
+    });
+  }
 }
 module.exports = RecordDAO;

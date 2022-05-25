@@ -23,4 +23,18 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.delete("/", async (req, res) => {
+  const { entityId, field } = req.query;
+
+  if (!entityId) return res.sendStatus(400);
+
+  try {
+    let result = await RecordDAO.deleteMany(entityId, field);
+    return res.json(result);
+  } catch (error) {
+    debug(error);
+    return res.sendStatus(500);
+  }
+});
+
 module.exports = router;
