@@ -29,28 +29,30 @@ class RecordDAO {
     });
   }
 
-  static async findByTimeUnit(entityId, field, unit, operator) {
-    return await Record.aggregate([
+  static async findByTimeUnit(entityId, field, unit, operator, from, to) {
+    let pipeline = [
       { $match: { "metadata.entityId": entityId, "metadata.field": field } },
-      {
-        $group: {
-          _id: {
-            date: { $dateTrunc: { date: "$timestamp", unit: unit } },
-          },
-          value: {
-            ["$" + operator]: operator !== "count" ? "$value" : {},
+    ];
+
+    if (from)
+      pipeline.push({ $match: { timestamp: { $gte: new Date(from) } } });
+
+    if (to) pipeline.push({ $match: { timestamp: { $lte: new Date(to) } } });
+
+    if (unit && operator)
+      pipeline.push(
+        {
+          $group: {
+            _id: { date: { $dateTrunc: { date: "$timestamp", unit: unit } } },
+            value: { ["$" + operator]: operator !== "count" ? "$value" : {} },
           },
         },
-      },
-      {
-        $project: {
-          _id: 0,
-          value: 1,
-          timestamp: "$_id.date",
-        },
-      },
-      { $sort: { timestamp: 1 } },
-    ]).toArray();
+        { $project: { _id: 0, value: 1, timestamp: "$_id.date" } }
+      );
+
+    pipeline.push({ $sort: { timestamp: 1 } });
+
+    return await Record.aggregate(pipeline).toArray();
   }
 
   static async deleteMany(entityId, field) {
