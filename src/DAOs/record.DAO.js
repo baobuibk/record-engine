@@ -42,17 +42,18 @@ class RecordDAO {
     pipeline.push({ $sort: { timestamp: 1 } });
 
     if (unit && operator)
-      if (operator === "integral") {
+      if (operator === "integral" || operator === "derivative") {
         if (["year", "quarter", "month"].includes(unit)) {
           //
         } else {
           pipeline.push(
             {
               $setWindowFields: {
+                partitionBy: { $dateTrunc: { date: "$timestamp", unit: unit } },
                 sortBy: { timestamp: 1 },
                 output: {
-                  integral: {
-                    $integral: { input: "$value", unit: unit },
+                  accumulative: {
+                    ["$" + operator]: { input: "$value", unit: "hour" },
                     window: { range: [-1, 0], unit: unit },
                   },
                 },
@@ -63,7 +64,7 @@ class RecordDAO {
                 _id: {
                   date: { $dateTrunc: { date: "$timestamp", unit: unit } },
                 },
-                value: { $first: "$integral" },
+                value: { $last: "$accumulative" },
               },
             },
             { $project: { _id: 0, value: 1, timestamp: "$_id.date" } }
