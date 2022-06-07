@@ -39,16 +39,47 @@ class RecordDAO {
 
     if (to) pipeline.push({ $match: { timestamp: { $lte: new Date(to) } } });
 
+    pipeline.push({ $sort: { timestamp: 1 } });
+
     if (unit && operator)
-      pipeline.push(
-        {
-          $group: {
-            _id: { date: { $dateTrunc: { date: "$timestamp", unit: unit } } },
-            value: { ["$" + operator]: operator !== "count" ? "$value" : {} },
+      if (operator === "integral") {
+        if (["year", "quarter", "month"].includes(unit)) {
+          //
+        } else {
+          pipeline.push(
+            {
+              $setWindowFields: {
+                sortBy: { timestamp: 1 },
+                output: {
+                  integral: {
+                    $integral: { input: "$value", unit: unit },
+                    window: { range: [-1, 0], unit: unit },
+                  },
+                },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  date: { $dateTrunc: { date: "$timestamp", unit: unit } },
+                },
+                value: { $first: "$integral" },
+              },
+            },
+            { $project: { _id: 0, value: 1, timestamp: "$_id.date" } }
+          );
+        }
+      } else {
+        pipeline.push(
+          {
+            $group: {
+              _id: { date: { $dateTrunc: { date: "$timestamp", unit: unit } } },
+              value: { ["$" + operator]: operator !== "count" ? "$value" : {} },
+            },
           },
-        },
-        { $project: { _id: 0, value: 1, timestamp: "$_id.date" } }
-      );
+          { $project: { _id: 0, value: 1, timestamp: "$_id.date" } }
+        );
+      }
 
     pipeline.push({ $sort: { timestamp: 1 } });
 
