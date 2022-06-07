@@ -15,7 +15,16 @@ const unitSet = new Set([
   "second",
   "millisecond",
 ]);
-const opSet = new Set(["avg", "count", "first", "last", "max", "min"]);
+const opSet = new Set([
+  "avg",
+  "count",
+  "first",
+  "last",
+  "max",
+  "min",
+  "integral",
+  "derivative",
+]);
 
 router.post("/", async (req, res) => {
   const { entityId, field } = req.query;
