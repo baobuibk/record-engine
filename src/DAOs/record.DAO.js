@@ -58,7 +58,9 @@ class RecordDAO {
                   },
                 },
               },
-            }
+            },
+            { $project: { timestamp: 1, value: "$accumulative" } }
+
             // {
             //   $group: {
             //     _id: {
