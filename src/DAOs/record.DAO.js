@@ -59,17 +59,15 @@ class RecordDAO {
                 },
               },
             },
-            { $project: { timestamp: 1, value: "$accumulative" } }
-
-            // {
-            //   $group: {
-            //     _id: {
-            //       date: { $dateTrunc: { date: "$timestamp", unit: unit } },
-            //     },
-            //     value: { $last: "$accumulative" },
-            //   },
-            // },
-            // { $project: { _id: 0, value: 1, timestamp: "$_id.date" } }
+            {
+              $group: {
+                _id: {
+                  date: { $dateTrunc: { date: "$timestamp", unit: unit } },
+                },
+                value: { $last: "$accumulative" },
+              },
+            },
+            { $project: { _id: 0, value: 1, timestamp: "$_id.date" } }
           );
         }
       } else {
