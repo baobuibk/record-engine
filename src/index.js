@@ -1,6 +1,4 @@
-require("dotenv").config();
-
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8001;
 const dbUri = process.env.DB_URI || "mongodb://localhost:27017";
 const dbName = process.env.DB_NAME || "record-engine";
 const dbTimeout = Number(process.env.DB_TIMEOUT_MS) || 10000;
