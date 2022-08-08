@@ -1,4 +1,5 @@
-const debug = require("debug")("ContextSubscriber");
+// const debug = require("debug")("ContextSubscriber");
+const debug = console.log;
 const { createClient } = require("redis");
 
 class ContextSubscriber {

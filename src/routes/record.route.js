@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 
 const RecordDAO = require("../DAOs/record.DAO");
-const debug = require("debug")("record.route");
+// const debug = require("debug")("record.route");
+const debug = console.log;
 
 const unitSet = new Set([
   "year",
