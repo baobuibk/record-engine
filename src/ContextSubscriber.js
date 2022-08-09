@@ -5,7 +5,9 @@ const { createClient } = require("redis");
 class ContextSubscriber {
   client;
   constructor() {
-    let client = createClient();
+    let client = createClient({
+      url: process.env.REDIS_URL || "redis://localhost:6379",
+    });
     client.on("connect", () => debug("connect"));
     client.on("ready", () => debug("ready"));
     client.on("end", () => debug("end"));
