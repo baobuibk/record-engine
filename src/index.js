@@ -1,19 +1,27 @@
-const PORT = process.env.PORT || 8001;
-const dbUri = process.env.DB_URI || "mongodb://localhost:27017";
+const PORT = process.env.RECORD_ENGINE_PORT || 8001;
+const DB_HOST = process.env.MONGO_HOST || "localhost";
+const dbUri = "mongodb://" + DB_HOST + ":27017";
 const dbName = process.env.DB_NAME || "record-engine";
 const dbTimeout = Number(process.env.DB_TIMEOUT_MS) || 10000;
 
 const httpServer = require("http").createServer(require("./app"));
 
-const ContextSubscriber = require("./ContextSubscriber");
-const conSub = new ContextSubscriber();
+const REDIS_HOST = process.env.REDIS_HOST || "localhost";
+const redisUrl = "redis://" + REDIS_HOST + ":6379";
+const { createClient } = require("redis");
+const redisClient = createClient({ url: redisUrl });
+redisClient.on("connect", () => console.log("redis client connect"));
+redisClient.connect();
+const { IoTConsumer } = require("node-iot-lib");
+const consumer = new IoTConsumer(redisClient);
+
 const Record = require("./DAOs/record.DAO");
 
 async function main() {
   await require("./db")(dbUri, dbName, dbTimeout);
   console.log("mongodb connect");
 
-  conSub.pSubscribe(`telemetry*`, async (message, channel) => {
+  consumer.pSubscribe(`telemetry*`, async (message, channel) => {
     try {
       const [_, entityId, field] = channel.split(".");
       const { value, timestamp } = JSON.parse(message);
